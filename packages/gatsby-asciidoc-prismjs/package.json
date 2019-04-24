@@ -16,7 +16,7 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "asciidoctor": "^2.0.0",
-    "asciidoctor-prism-extension": "^2.0.5"
+    "asciidoctor-prism-extension": "^2.0.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
