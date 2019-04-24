@@ -1,5 +1,6 @@
 const asciidoc = require(`asciidoctor`)()
 const _ = require(`lodash`)
+const Promise = require(`bluebird`)
 
 async function onCreateNode(
   {
@@ -27,6 +28,7 @@ async function onCreateNode(
 
   // changes the incoming imagesdir option to take the
   const asciidocOptions = processPluginOptions(pluginOptions, pathPrefix)
+  registerExtension(asciidoc, pathPrefix, asciidocOptions)
 
   const { createNode, createParentChildLink } = actions
   // Load Asciidoc contents
@@ -126,5 +128,24 @@ const extractPageAttributes = allAttributes =>
     }
     return pageAttributes
   }, {})
+
+const registerExtension = (asciidoc, pathPrefix, pluginOptions) => {
+  // Use Bluebird's Promise function "each" to run remark plugins serially.
+  Promise.each(pluginOptions.plugins, plugin => {
+    const requiredPlugin = require(plugin.resolve)
+    if (_.isFunction(requiredPlugin)) {
+      return requiredPlugin(
+        {
+          asciidoc,
+          pathPrefix,
+          pluginOptions,
+        },
+        plugin.pluginOptions
+      )
+    } else {
+      return Promise.resolve()
+    }
+  })
+}
 
 exports.onCreateNode = onCreateNode
