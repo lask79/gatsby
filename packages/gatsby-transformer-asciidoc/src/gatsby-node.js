@@ -28,7 +28,7 @@ async function onCreateNode(
 
   // changes the incoming imagesdir option to take the
   const asciidocOptions = processPluginOptions(pluginOptions, pathPrefix)
-  registerExtension(asciidoc, pathPrefix, asciidocOptions)
+  registerExtension(node, asciidoc, pathPrefix, asciidocOptions)
 
   const { createNode, createParentChildLink } = actions
   // Load Asciidoc contents
@@ -129,17 +129,13 @@ const extractPageAttributes = allAttributes =>
     return pageAttributes
   }, {})
 
-const registerExtension = (asciidoc, pathPrefix, pluginOptions) => {
+const registerExtension = (node, asciidoc, pathPrefix, pluginOptions) => {
   // Use Bluebird's Promise function "each" to run remark plugins serially.
   Promise.each(pluginOptions.plugins, plugin => {
     const requiredPlugin = require(plugin.resolve)
     if (_.isFunction(requiredPlugin)) {
       return requiredPlugin(
-        {
-          asciidoc,
-          pathPrefix,
-          pluginOptions,
-        },
+        { node, asciidoc, pathPrefix, pluginOptions },
         plugin.pluginOptions
       )
     } else {
