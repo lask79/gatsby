@@ -1,43 +1,52 @@
 pipeline {
     agent any
+    options {
+        parallelsAlwaysFailFast()
+    }
     stages {
-        stage('Build') {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
             parallel {
-                stage('GRP') {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
                     steps {
-                        echo 'GRP'
+                        echo "On Branch A"
                     }
                 }
-                stage('RuleTree') {
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
                     steps {
-                        echo 'test'
+                        echo "On Branch B"
                     }
                 }
-            } 
-
-            stage('GRP') {
-                steps {
-                    echo 'GRP'
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
                 }
-            }
-
-        }
-        stage('Test') {
-            steps {
-                echo 'Test'
-            }
-        }
-
-        stage('Deploy') {
-            input {
-                message "Should we continue?"
-                ok "Yes, we should."
-
-            }
-            steps {
-                echo 'Test'
             }
         }
     }
-}            
-            
